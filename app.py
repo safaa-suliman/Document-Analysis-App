@@ -12,7 +12,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF  # Import NMF
-
+nltk.download("stopwords")
+nltk.download("punkt")  # Ensure 'punkt' is also available for tokenization
 
 # Set page configuration
 st.set_page_config(page_title="Document Analysis Webpage", page_icon="📄", layout="wide")
