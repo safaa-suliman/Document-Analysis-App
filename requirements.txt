@@ -5,3 +5,5 @@ nltk
 scikit-learn
 seaborn
 matplotlib
+nltk.download('punkt')
+nltk.download("stopwords")
