@@ -1,1 +1,7 @@
-pip install PyMuPDF
+streamlit
+PyMuPDF
+pandas
+nltk
+scikit-learn
+seaborn
+matplotlib
