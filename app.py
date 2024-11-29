@@ -12,7 +12,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF  # Import NMF
-nltk.download("stopwords")
+nltk.download('stopwords')
 nltk.download('punkt')
 
 
