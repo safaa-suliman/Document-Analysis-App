@@ -12,8 +12,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF  # Import NMF
-nltk.download("stopwords")
-nltk.download("punkt")
+
+# Download NLTK data only if not already available
+nltk_data_path = os.path.join(os.getcwd(), "nltk_data")
+nltk.data.path.append(nltk_data_path)
+if not os.path.exists(os.path.join(nltk_data_path, "tokenizers/punkt")):
+    nltk.download("punkt", download_dir=nltk_data_path)
+    nltk.download("stopwords", download_dir=nltk_data_path)
 
 
 # Set page configuration
