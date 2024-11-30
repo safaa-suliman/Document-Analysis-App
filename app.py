@@ -12,7 +12,9 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF  # Import NMF
-
+import nltk
+nltk.download('punkt')
+nltk.download('punkt_tab')
 
 
 # Set page configuration
