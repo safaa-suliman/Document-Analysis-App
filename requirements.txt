@@ -1,8 +1,7 @@
-streamlit
-PyMuPDF
-pandas
-nltk
-scikit-learn
-seaborn
-matplotlib
-
+streamlit==1.26.0
+PyMuPDF==1.22.3
+pandas==1.5.3
+nltk==3.8.1
+scikit-learn==1.3.0
+seaborn==0.12.2
+matplotlib==3.7.1
