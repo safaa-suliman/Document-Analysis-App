@@ -12,9 +12,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.decomposition import LatentDirichletAllocation
 from sklearn.cluster import KMeans
 from sklearn.decomposition import NMF  # Import NMF
-import nltk
-nltk.download('punkt')
-nltk.download('punkt_tab')
+nltk.data.path.append('./nltk_data')  # Specify the path to pre-downloaded data
+
 
 
 # Set page configuration
@@ -94,6 +93,25 @@ def clustering(pdf_texts, num_clusters=3):
     kmeans = KMeans(n_clusters=num_clusters, random_state=42).fit(tfidf_matrix)
     return kmeans.labels_
 
+
+# Function to filter texts containing a specific word
+def filter_texts_by_word(texts, word):
+    return [text for text in texts if word.lower() in text.lower()]
+
+# Function for NMF Topic Modeling
+def nmf_topic_modeling_on_specific_word(texts, num_topics=3):
+    vectorizer = CountVectorizer(stop_words="english")
+    doc_term_matrix = vectorizer.fit_transform(texts)
+    nmf_model = NMF(n_components=num_topics, random_state=42)
+    nmf_model.fit(doc_term_matrix)
+
+    feature_names = vectorizer.get_feature_names_out()
+    topics = []
+    for topic_idx, topic in enumerate(nmf_model.components_):
+        top_words_nmf = [feature_names[i] for i in topic.argsort()[:-11:-1]]
+        topics.append(f"Topic {topic_idx + 1}: {', '.join(top_words_nmf)}")
+    return topics
+
 # Streamlit App
 st.title("📂 Document Analysis - Enhanced Features")
 
@@ -119,7 +137,7 @@ if uploaded_files:
             if text.strip():  # Check if extracted text is not empty
                 pdf_texts.append({"filename": uploaded_file.name, "text": text})
             else:
-                st.warning(f"No text extracted from {uploaded_file.name}.")
+                st.warning(f"Seems your file {uploaded_file.name}. is pdf with image data")
         else:
             st.warning(f"Skipping non-PDF file: {uploaded_file.name}")
 
@@ -157,8 +175,34 @@ if uploaded_files:
         specific_word = st.text_input("Enter a word to analyze its frequency:")
         if st.button("Calculate Frequency"):
             if specific_word:
-                specific_word_count = st.session_state.word_counts.get(specific_word.lower(), 0)
-                st.write(f"The word **'{specific_word}'** appears **{specific_word_count}** times.")
+                if 'top_words' in st.session_state and 'word_counts' in st.session_state:
+                    if st.session_state.top_words and st.session_state.word_counts:  # Check if they're not empty
+        
+                        specific_word_count = st.session_state.word_counts.get(specific_word.lower(), 0)
+                        st.write(f"The word **'{specific_word}'** appears **{specific_word_count}** times.")
+                        # Calculate frequency for each document
+                        word_frequencies_per_doc = []
+                        for doc in pdf_texts:
+                            # Tokenize and preprocess document text
+                            words = word_tokenize(re.sub(r'\W+', ' ', doc["text"].lower()))
+                            specific_word_count = Counter(words).get(specific_word.lower(), 0)
+                            word_frequencies_per_doc.append({
+                                "Document": doc["filename"],
+                                "Frequency": specific_word_count
+                            })
+                    
+                        # Create and display a DataFrame
+                        if specific_word_count == 0:
+                            st.write("")
+                        else:
+                            frequency_df = pd.DataFrame(word_frequencies_per_doc)
+                            st.write(f"The Freuency of **'{specific_word}'** in Each Document:")
+                            st.table(frequency_df)
+                    
+                    else:        
+                        st.warning("The session state variables are empty. Please run the analysis first.")
+                else:
+                    st.info("Click 'Analyze Texts' first to perform the analysis.")
             else:
                 st.warning("Please enter a word to analyze.")
 
@@ -191,5 +235,20 @@ if uploaded_files:
         st.write("### Clustered Documents (NMF):")
         st.dataframe(pdf_df)
 
+    if st.button("Apply NMF Based on Specific Word"):
+        if specific_word:
+        # Filter texts based on the specific word
+            filtered_texts = filter_texts_by_word([doc["text"] for doc in pdf_texts], specific_word)
+        
+            if filtered_texts:
+                # Apply NMF to the filtered texts
+                nmf_topics = nmf_topic_modeling_on_specific_word(filtered_texts, num_topics=num_topics_nmf)
+                st.write(f"### NMF Topic Modeling Results for documents containing the word '{specific_word}':")
+                for topic in nmf_topics:
+                    st.write(topic)
+            else:
+                st.warning(f"No documents contain the word '{specific_word}'.")
+        else:
+            st.warning("Please enter a word to perform NMF.")
 else:
     st.info("Please upload multiple PDF files.")
